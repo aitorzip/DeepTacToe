@@ -1,5 +1,5 @@
 # Deep Tac Toe
-Multi-platform (Windows, GNU/Linux, Mac, Android, iOS) improved version of the original Tic Tac Toe
+Multi-platform (Windows, GNU/Linux, Mac, Android, iOS) funnier version of the original Tic Tac Toe
 
 ## Requirements
 
