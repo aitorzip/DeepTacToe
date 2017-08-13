@@ -4,6 +4,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.config import Config
+from kivy.clock import Clock
 
 import random
 
@@ -13,11 +14,14 @@ P2 = 2
 
 class Game(App):
     title = 'Deep Tac Toe!'
+    last_button_pressed = None
 
-    board = None
-
-    turn = True
-    points = [0,0]
+    def __init__(self, player_list, update_rate=300):
+        super(Game, self).__init__()
+        self.player_list = player_list
+        self.last_button_pressed = None
+        self.turn = 0
+        Clock.schedule_interval(self.update, 1.0/update_rate)
 
     # On application build handler
     def build(self):
@@ -26,6 +30,7 @@ class Game(App):
         Config.set('graphics','resizable', False)
 
         self.board = Board(100, 3, 3, self)
+
         return self.board
 
     # On application start handler
@@ -35,10 +40,10 @@ class Game(App):
     # Initializes player turn randomly
     def init_players(self):
         if random.random() < 0.5:
-            self.turn = True
+            self.turn = 0
             msg = 'Player One starts first'
         else:
-            self.turn = False
+            self.turn = 1
             msg = 'Player Two starts first'
 
         self.popup_message('Welcome!', msg)
@@ -56,25 +61,41 @@ class Game(App):
             popup.bind(on_dismiss=on_dismiss)
         popup.open()
 
-    # Handler when a button is pressed
-    def btn_pressed(self, button):
+    def update(self, *args):
+        button_id = self.player_list[self.turn].move(self)
+
+        if button_id is None:
+            return
+
+        button = self.board.boxers[button_id[0]].boxes[button_id[1]]
+        self.last_button_pressed = None
+
+        # Already occupied
         if button.text != '':
             return
 
-        if self.turn == True:
+        # Change button state
+        if self.turn == 0:
             button.text = 'X'
         else:
             button.text = 'O'
 
+        # Change available places
+        self.board.toggle_boxers(button_id[1])
+
+        # Change to next turn
+        self.turn = (self.turn + 1) % len(self.player_list)
+
+        # Check if someone has already won
         winner = self.board.check_state()
         if winner != UNOCCUPIED:
-            msg = 'Player ' + str(winner) + 'wins!'
-            self.points[winner-1] += 1
+            self.player_list[self.turn].add_points(1)
+            msg = 'Player ' + str(self.turn) + 'wins!'
             self.popup_message('Game over!', msg, on_dismiss=self.new_match)
             return
 
-        self.board.toggle_boxers(int(button.id))
-        self.turn = not self.turn
+    def btn_pressed(self, button):
+        self.last_button_pressed = button
 
 class Board(GridLayout):
     valid_combos = [
@@ -93,7 +114,7 @@ class Board(GridLayout):
         self.boxers = []
 
         for i in range(boxer_grid_size*boxer_grid_size):
-            boxer = Boxer(box_size, box_grid_size, game)
+            boxer = Boxer(box_size, box_grid_size, game, id=str(i))
             self.boxers.append(boxer)
             self.add_widget(boxer)
 
@@ -152,7 +173,7 @@ class Boxer(GridLayout):
 
         for i in range(box_grid_size*box_grid_size):
             box = Button(text='', font_size=box_size-30, width=box_size,
-                        height=box_size, size_hint=(None,None), id=str(i))
+                        height=box_size, size_hint=(None,None), id=self.id + '_' + str(i))
             box.bind(on_release=game.btn_pressed)
             self.boxes.append(box)
             self.add_widget(box)
