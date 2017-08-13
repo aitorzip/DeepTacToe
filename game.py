@@ -80,19 +80,21 @@ class Game(App):
         else:
             button.text = 'O'
 
+        # Check if someone has already won
+        winner = self.board.check_state()
+        if winner != UNOCCUPIED:
+            self.player_list[self.turn].add_points(1)
+            msg = 'Player ' + str(self.turn + 1) + ' wins!'
+            self.popup_message('Game over!', msg, on_dismiss=self.new_match)
+            return
+
         # Change available places
         self.board.toggle_boxers(button_id[1])
 
         # Change to next turn
         self.turn = (self.turn + 1) % len(self.player_list)
 
-        # Check if someone has already won
-        winner = self.board.check_state()
-        if winner != UNOCCUPIED:
-            self.player_list[self.turn].add_points(1)
-            msg = 'Player ' + str(self.turn) + 'wins!'
-            self.popup_message('Game over!', msg, on_dismiss=self.new_match)
-            return
+
 
     def btn_pressed(self, button):
         self.last_button_pressed = button
