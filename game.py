@@ -10,14 +10,13 @@ from kivy.core.audio import SoundLoader
 import random
 
 # Constants
-SYMBOLS = ('X','O','M')
+SYMBOLS = ('X','O')
 UNNOCUPIED = -1
 
 class Game(App):
     title = 'Deep Tac Toe!'
     sounds = (SoundLoader.load('assets/player1_move.ogg'),
-            SoundLoader.load('assets/player2_move.ogg'),
-            SoundLoader.load('assets/player1_move.ogg'))
+            SoundLoader.load('assets/player2_move.ogg'))
 
     def __init__(self, players, update_rate=300, silent=False):
         super(Game, self).__init__()
@@ -49,7 +48,8 @@ class Game(App):
     # Initializes player turn randomly
     def init_players(self):
         self.turn = random.randint(0, len(self.players) - 1)
-        #self.popup_message('Welcome!', 'Player ' + str(self.turn + 1) + ' starts first')
+        if not self.silent:
+            self.popup_message('Welcome!', 'Player ' + str(self.turn + 1) + ' starts first')
 
     # Starts a new match
     def new_match(self, popup):
