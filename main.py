@@ -7,4 +7,4 @@ __version__ = '1.0'
 
 if __name__ == '__main__':
 
-    Game([Human(),AI()]).run()
+    Game([AI(train=True),AI(train=True)], silent=True).run()

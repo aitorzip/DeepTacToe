@@ -5,22 +5,31 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.config import Config
 from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
 
 import random
 
-UNOCCUPIED = 0
-P1 = 1
-P2 = 2
+# Constants
+SYMBOLS = ('X','O','M')
+UNNOCUPIED = -1
 
 class Game(App):
     title = 'Deep Tac Toe!'
-    last_button_pressed = None
+    sounds = (SoundLoader.load('assets/player1_move.ogg'),
+            SoundLoader.load('assets/player2_move.ogg'),
+            SoundLoader.load('assets/player1_move.ogg'))
 
-    def __init__(self, player_list, update_rate=300):
+    def __init__(self, players, update_rate=300, silent=False):
         super(Game, self).__init__()
-        self.player_list = player_list
+
+        if len(players) > len(SYMBOLS):
+            raise ValueError('Number of players should be equal or less than ' + str(len(SYMBOLS)))
+            return
+
+        self.players = players
+        self.silent = silent
         self.last_button_pressed = None
-        self.turn = 0
+
         Clock.schedule_interval(self.update, 1.0/update_rate)
 
     # On application build handler
@@ -39,14 +48,8 @@ class Game(App):
 
     # Initializes player turn randomly
     def init_players(self):
-        if random.random() < 0.5:
-            self.turn = 0
-            msg = 'Player One starts first'
-        else:
-            self.turn = 1
-            msg = 'Player Two starts first'
-
-        self.popup_message('Welcome!', msg)
+        self.turn = random.randint(0, len(self.players) - 1)
+        #self.popup_message('Welcome!', 'Player ' + str(self.turn + 1) + ' starts first')
 
     # Starts a new match
     def new_match(self, popup):
@@ -62,11 +65,12 @@ class Game(App):
         popup.open()
 
     def update(self, *args):
-        button_id = self.player_list[self.turn].move(self)
+        button_id = self.players[self.turn].move(self)
 
         if button_id is None:
             return
 
+        # Gets the button from the id
         button = self.board.boxers[button_id[0]].boxes[button_id[1]]
         self.last_button_pressed = None
 
@@ -74,27 +78,40 @@ class Game(App):
         if button.text != '':
             return
 
+        # Play sound
+        if not self.silent:
+            self.sounds[self.turn].play()
+
         # Change button state
-        if self.turn == 0:
-            button.text = 'X'
-        else:
-            button.text = 'O'
+        button.text = SYMBOLS[self.turn]
 
         # Check if someone has already won
         winner = self.board.check_state()
-        if winner != UNOCCUPIED:
-            self.player_list[self.turn].add_points(1)
-            msg = 'Player ' + str(self.turn + 1) + ' wins!'
-            self.popup_message('Game over!', msg, on_dismiss=self.new_match)
+        if winner != UNNOCUPIED:
+            self.players[winner].add_points(1)
+            if not self.silent:
+                self.popup_message('Game over!', 'Player ' + str(winner + 1) + ' wins!', on_dismiss=self.new_match)
+            else:
+                self.new_match(None)
             return
 
         # Change available places
         self.board.toggle_boxers(button_id[1])
 
+        # Check if it is a draw (no space left to move)
+        available_boxers = [boxer for boxer in self.board.boxers if not boxer.disabled]
+        available_boxes = []
+        for boxer in available_boxers:
+            available_boxes += [box for box in boxer.boxes if box.text == '']
+        if len(available_boxes) == 0:
+            if not self.silent:
+                self.popup_message('Game over!', 'Draw!', on_dismiss=self.new_match)
+            else:
+                self.new_match(None)
+            return
+
         # Change to next turn
-        self.turn = (self.turn + 1) % len(self.player_list)
-
-
+        self.turn = (self.turn + 1) % len(self.players)
 
     def btn_pressed(self, button):
         self.last_button_pressed = button
@@ -130,27 +147,26 @@ class Board(GridLayout):
             boxer.check_state()
 
         for combo in self.valid_combos:
-            if all(self.boxers[boxer_id].state == P1 for boxer_id in combo):
-                return P1
-            elif all(self.boxers[boxer_id].state == P2 for boxer_id in combo):
-                return P2
+            for i in range(len(SYMBOLS)):
+                if all(self.boxers[boxer_id].state == i for boxer_id in combo):
+                    return i
 
-        return UNOCCUPIED
+        return UNNOCUPIED
 
     def toggle_boxers(self, id):
-        if self.boxers[id].state == UNOCCUPIED:
+        if self.boxers[id].state == UNNOCUPIED:
             for boxer in self.boxers:
                 boxer.disabled = True
             self.boxers[id].disabled = False
         else:
             for boxer in self.boxers:
-                if boxer.state == UNOCCUPIED:
+                if boxer.state == UNNOCUPIED:
                     boxer.disabled = False
                 else:
                     boxer.disabled = True
 
     def is_boxer_occupied(self, id):
-        return self.boxers[id].state != UNOCCUPIED
+        return self.boxers[id].state != UNNOCUPIED
 
     def set_boxer_active(self, id, active=False):
         for boxer in self.boxers:
@@ -170,7 +186,7 @@ class Boxer(GridLayout):
         self.cols = box_grid_size
         self.rows = self.cols
 
-        self.state = UNOCCUPIED
+        self.state = UNNOCUPIED
         self.boxes = []
 
         for i in range(box_grid_size*box_grid_size):
@@ -181,19 +197,18 @@ class Boxer(GridLayout):
             self.add_widget(box)
 
     def reset(self):
-        self.state = UNOCCUPIED
+        self.state = UNNOCUPIED
         self.disabled = False
         for box in self.boxes:
             box.text = ''
             box.disabled = False
 
     def check_state(self):
-        self.state = UNOCCUPIED
+        self.state = UNNOCUPIED
 
         for combo in self.valid_combos:
-            if all(self.boxes[box_id].text == 'X' for box_id in combo):
-                self.state = P1
-            elif all(self.boxes[box_id].text == 'O' for box_id in combo):
-                self.state = P2
+            for i,symbol in enumerate(SYMBOLS):
+                if all(self.boxes[box_id].text == symbol for box_id in combo):
+                    self.state = i
 
         return self.state

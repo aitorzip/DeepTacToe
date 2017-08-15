@@ -25,16 +25,21 @@ class Human(Player):
         return (int(button_id[0]), int(button_id[1]))
 
 class AI(Player):
+    def __init__(self, train=False):
+        self.train = train
+
     # Random for now
     def move(self, game):
-        available_boxers = [boxer for boxer in game.board.boxers if not boxer.disabled]
-        boxer = random.choice(available_boxers)
 
-        available_boxes = [box for box in boxer.boxes if box.text == '']
+        available_boxers = [boxer for boxer in game.board.boxers if not boxer.disabled]
+        available_boxes = []
+        for boxer in available_boxers:
+            available_boxes += [box for box in boxer.boxes if box.text == '']
         box = random.choice(available_boxes)
 
         # Fake thinking time
-        sleep(random.randint(1,5))
+        if not self.train:
+            sleep(random.randint(1,5))
 
         button_id = box.id.split('_')
         return (int(button_id[0]), int(button_id[1]))
