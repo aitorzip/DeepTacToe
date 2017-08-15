@@ -11,14 +11,17 @@ import random
 
 # Constants
 SYMBOLS = ('X','O')
+COLORS = ('3333ff', 'ff3333')
+SOUNDS = (SoundLoader.load('assets/player1_move.ogg'),
+        SoundLoader.load('assets/player2_move.ogg'))
+
 UNNOCUPIED = -1
 
 class Game(App):
     title = 'Deep Tac Toe!'
-    sounds = (SoundLoader.load('assets/player1_move.ogg'),
-            SoundLoader.load('assets/player2_move.ogg'))
 
-    def __init__(self, players, update_rate=300, silent=False):
+
+    def __init__(self, players, grid_size=5, update_rate=300, silent=False):
         super(Game, self).__init__()
 
         if len(players) > len(SYMBOLS):
@@ -26,6 +29,7 @@ class Game(App):
             return
 
         self.players = players
+        self.grid_size = grid_size
         self.silent = silent
         self.last_button_pressed = None
 
@@ -33,11 +37,16 @@ class Game(App):
 
     # On application build handler
     def build(self):
-        Config.set('graphics', 'width', str(100*3*3 + 20*2))
-        Config.set('graphics', 'height', str(100*3*3 + 20*2))
+        # TODO: 100 and 20 should be automatically inferred from screen dimensions
+        width = 940
+
+        Config.set('graphics', 'width', width)
+        Config.set('graphics', 'height', width)
         Config.set('graphics','resizable', False)
 
-        self.board = Board(100, 3, 3, self)
+        box_size = (width - (self.grid_size - 1)*20)/(self.grid_size*self.grid_size)
+        print(box_size)
+        self.board = Board(box_size, self.grid_size, self)
 
         return self.board
 
@@ -49,7 +58,8 @@ class Game(App):
     def init_players(self):
         self.turn = random.randint(0, len(self.players) - 1)
         if not self.silent:
-            self.popup_message('Welcome!', 'Player ' + str(self.turn + 1) + ' starts first')
+            msg = '[color=' + COLORS[self.turn] + ']Player ' + SYMBOLS[self.turn] + ' starts first[/color]'
+            self.popup_message('Welcome!', msg)
 
     # Starts a new match
     def new_match(self, popup):
@@ -59,7 +69,8 @@ class Game(App):
 
     # A generic popup message
     def popup_message(self, title, msg, on_dismiss=None):
-        popup = Popup(title=title, content=Label(text=msg), size=(435, 100), size_hint=(None, None))
+        popup = Popup(title=title, content=Label(text=msg, font_size=20, markup=True),
+                        size=(435, 100), size_hint=(None, None))
         if on_dismiss is not None:
             popup.bind(on_dismiss=on_dismiss)
         popup.open()
@@ -80,17 +91,18 @@ class Game(App):
 
         # Play sound
         if not self.silent:
-            self.sounds[self.turn].play()
+            SOUNDS[self.turn].play()
 
         # Change button state
-        button.text = SYMBOLS[self.turn]
+        button.text = '[color=' + COLORS[self.turn] + ']' + SYMBOLS[self.turn] + '[/color]'
 
         # Check if someone has already won
         winner = self.board.check_state()
         if winner != UNNOCUPIED:
             self.players[winner].add_points(1)
             if not self.silent:
-                self.popup_message('Game over!', 'Player ' + str(winner + 1) + ' wins!', on_dismiss=self.new_match)
+                msg = '[color=' + COLORS[winner] + ']Player ' + SYMBOLS[winner] + ' wins![/color]'
+                self.popup_message('Game over!', msg, on_dismiss=self.new_match)
             else:
                 self.new_match(None)
             return
@@ -117,23 +129,33 @@ class Game(App):
         self.last_button_pressed = button
 
 class Board(GridLayout):
-    valid_combos = [
-        (0,1,2), (3,4,5), (6,7,8),  #Horizontal
-        (0,3,6), (1,4,7), (2,5,8),  #Vertical
-        (0,4,8), (2,4,6)            #Diagonal
-    ]
 
-    def __init__(self, box_size, box_grid_size, boxer_grid_size, game, **kwargs):
+    def __init__(self, box_size, grid_size, game, **kwargs):
         super(Board, self).__init__(**kwargs)
 
-        self.cols = boxer_grid_size
+        self.cols = grid_size
         self.rows = self.cols
         self.spacing = [20,20]
 
+        self.valid_combos = []
         self.boxers = []
 
-        for i in range(boxer_grid_size*boxer_grid_size):
-            boxer = Boxer(box_size, box_grid_size, game, id=str(i))
+        h_combos = []
+        for i in range(grid_size):
+            h_combos.append(range(i, i + grid_size*(grid_size - 1) + 1, grid_size))
+        self.valid_combos += zip(*h_combos)
+
+        v_combos = []
+        for i in range(grid_size):
+            v_combos.append(range(i*grid_size, grid_size*(i+1)))
+        self.valid_combos += zip(*v_combos)
+
+        x = tuple(range(0, grid_size*grid_size, grid_size + 1))
+        y = tuple(range(grid_size - 1, grid_size*(grid_size - 1) + 1, grid_size - 1))
+        self.valid_combos += [x,y]
+
+        for i in range(grid_size*grid_size):
+            boxer = Boxer(box_size, grid_size, game, id=str(i))
             self.boxers.append(boxer)
             self.add_widget(boxer)
 
@@ -174,24 +196,35 @@ class Board(GridLayout):
         self.boxers[id].disabled = not active
 
 class Boxer(GridLayout):
-    valid_combos = [
-        (0,1,2), (3,4,5), (6,7,8),  #Horizontal
-        (0,3,6), (1,4,7), (2,5,8),  #Vertical
-        (0,4,8), (2,4,6)            #Diagonal
-    ]
 
-    def __init__(self, box_size, box_grid_size, game, **kwargs):
+    def __init__(self, box_size, grid_size, game, **kwargs):
         super(Boxer, self).__init__(**kwargs)
 
-        self.cols = box_grid_size
+        self.cols = grid_size
         self.rows = self.cols
 
         self.state = UNNOCUPIED
         self.boxes = []
+        self.valid_combos = []
 
-        for i in range(box_grid_size*box_grid_size):
-            box = Button(text='', font_size=box_size-30, width=box_size,
-                        height=box_size, size_hint=(None,None), id=self.id + '_' + str(i))
+        combos = []
+        for i in range(grid_size):
+            combos.append(range(i, i + grid_size*(grid_size - 1) + 1, grid_size))
+        self.valid_combos += zip(*combos)
+
+        combos = []
+        for i in range(grid_size):
+            combos.append(range(i*grid_size, grid_size*(i+1)))
+        self.valid_combos += zip(*combos)
+
+        x = tuple(range(0, grid_size*grid_size, grid_size + 1))
+        y = tuple(range(grid_size - 1, grid_size*(grid_size - 1) + 1, grid_size - 1))
+        self.valid_combos += [x,y]
+
+        for i in range(grid_size*grid_size):
+            box = Button(text='', font_size=box_size, width=box_size,
+                        height=box_size, size_hint=(None,None),
+                        id=self.id + '_' + str(i), markup=True)
             box.bind(on_release=game.btn_pressed)
             self.boxes.append(box)
             self.add_widget(box)
@@ -208,7 +241,7 @@ class Boxer(GridLayout):
 
         for combo in self.valid_combos:
             for i,symbol in enumerate(SYMBOLS):
-                if all(self.boxes[box_id].text == symbol for box_id in combo):
+                if all(self.boxes[box_id].text == ('[color=' + COLORS[i] + ']' + symbol + '[/color]') for box_id in combo):
                     self.state = i
 
         return self.state
