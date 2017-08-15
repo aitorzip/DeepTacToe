@@ -19,7 +19,7 @@ SOUNDS = (SoundLoader.load('assets/player1_move.ogg'),
 UNNOCUPIED = -1
 
 class Game(App):
-    title = 'Deep Tac Toe!'
+    title = 'Deep Tac Toe!' # Deep Ass Hole
 
     def __init__(self, players, grid_size=4, update_rate=300, silent=False):
         super(Game, self).__init__()

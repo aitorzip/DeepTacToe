@@ -35,13 +35,13 @@ version.filename = %(source.dir)s/main.py
 requirements = kivy, hostpython2
 
 # (str) Presplash of the application
-#presplash.filename = %(source.dir)s/data/presplash.png
+#presplash.filename = %(source.dir)s/assets/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+#icon.filename = %(source.dir)s/assets/icon.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
-orientation = all
+orientation = landscape
 
 # (bool) Indicate if the application should be fullscreen or not
 fullscreen = 1
