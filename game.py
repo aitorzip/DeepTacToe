@@ -21,7 +21,7 @@ UNNOCUPIED = -1
 class Game(App):
     title = 'Deep Tac Toe!'
 
-    def __init__(self, players, grid_size=5, update_rate=300, silent=False):
+    def __init__(self, players, grid_size=4, update_rate=300, silent=False):
         super(Game, self).__init__()
 
         if len(players) > len(SYMBOLS):
@@ -37,7 +37,6 @@ class Game(App):
 
     # On application build handler
     def build(self):
-        # TODO: 100 and 20 should be automatically inferred from screen dimensions
         width = 940
 
         Config.set('graphics', 'width', width)
