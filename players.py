@@ -39,7 +39,7 @@ class AI(Player):
 
         # Fake thinking time
         if not self.train:
-            sleep(random.randint(1,5))
+            sleep(random.uniform(0.1,3.0))
 
         button_id = box.id.split('_')
         return (int(button_id[0]), int(button_id[1]))

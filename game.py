@@ -10,16 +10,16 @@ from kivy.core.audio import SoundLoader
 import random
 
 # Constants
-SYMBOLS = ('X','O')
-COLORS = ('3333ff', 'ff3333')
+SYMBOLS = ('X','O','#')
+COLORS = ('3333ff', 'ff3333', '33ff33')
 SOUNDS = (SoundLoader.load('assets/player1_move.ogg'),
-        SoundLoader.load('assets/player2_move.ogg'))
+        SoundLoader.load('assets/player2_move.ogg'),
+        SoundLoader.load('assets/player3_move.ogg'))
 
 UNNOCUPIED = -1
 
 class Game(App):
     title = 'Deep Tac Toe!'
-
 
     def __init__(self, players, grid_size=5, update_rate=300, silent=False):
         super(Game, self).__init__()
