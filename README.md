@@ -3,8 +3,8 @@ Multi-platform (Windows, GNU/Linux, Mac, Android, iOS) funnier version of the or
 
 ## Requirements
 
+* Python
 * Kivy
-* Python 2.7
 
 Run with:
 
