@@ -40,6 +40,7 @@ public:
 
   delta_state_t move(uint8_t player, uint8_t mini_grid_id, uint8_t box_id);
   uint8_t addPlayer();
+  uint8_t removePlayer();
 }
 
 #endif

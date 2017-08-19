@@ -132,7 +132,14 @@ delta_state_t DeepTacToeGame::move(uint8_t player, uint8_t mini_grid_id, uint8_t
   return delta_state;
 }
 
-uint8_t Game::addPlayer() {
-  if (this->n_players == this->max_n_players) throw std::logic_error("No more players allowed in this game!");
-  return this->players[this->n_players++];
+uint8_t DeepTacToeGame::addPlayer() {
+  if (this->n_players == this->max_n_players) throw std::logic_error("Can't add more players. Game is full.");
+  this->n_players++;
+  return this->n_players;
+}
+
+uint8_t DeepTacToeGame::removePlayer() {
+  if (this->n_players == 0) throw std::logic_error("Can't remove more players. Game is empty.")
+  this->n_players--;
+  return this->n_players;
 }
