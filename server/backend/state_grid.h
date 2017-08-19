@@ -15,8 +15,6 @@ public:
   uint8_t getStateAt(uint8_t i) { return this->state_grid[i]; }
   void setStateAt(uint8_t i, uint8_t state);
   uint8_t getOverallState(uint8_t** valid_combos);
-
-  void reset();
 }
 
 #endif

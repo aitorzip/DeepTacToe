@@ -16,21 +16,15 @@ DeepTacToeGame::DeepTacToeGame(uint8_t size, uint8_t max_n_players) {
   this->main_grid = StateGrid(n_players + 1, size);
 
   this->mini_grids = new StateGrid[size*size];
-  for (uint8_t i = 0; i < size*size; i++) {
-    this->mini_grids[i] = StateGrid(n_players +1, size);
-  }
+  for (uint8_t i = 0; i < size*size; i++) this->mini_grids[i] = StateGrid(n_players +1, size);
 
   // Initially, all mini grids are playable
   this->allowed_mini_grids = new uint8_t[size*size];
-  for (uint8_t i = 0; i < size*size; i++) {
-    this->allowed_mini_grids[i] = i;
-  }
+  for (uint8_t i = 0; i < size*size; i++) this->allowed_mini_grids[i] = i;
   this->n_allowed_mini_grids = size*size;
 
   // Initialize players
-  for (uint8_t i = 0; i < max_n_players; i++) {
-    this->players[i] = i+1;
-  }
+  for (uint8_t i = 0; i < max_n_players; i++) this->players[i] = i+1;
 
   // Setup the valid winning combinations
   this->valid_combos = new uint8_t*[2*(size + 1)];
@@ -76,9 +70,7 @@ DeepTacToeGame::DeepTacToeGame(uint8_t size, uint8_t max_n_players) {
 DeepTacToeGame::~DeepTacToeGame() {
   delete [] this->players;
   delete [] this->mini_grids;
-  for(uint8_t i = 0; i < 2*(this->size + 1); i++) {
-    delete [] this->valid_combos[i];
-  }
+  for(uint8_t i = 0; i < 2*(this->size + 1); i++) delete [] this->valid_combos[i];
   delete [] this->valid_combos;
   delete [] this->allowed_mini_grids;
   delete this->main_grid;
@@ -90,7 +82,7 @@ delta_state_t DeepTacToeGame::move(uint8_t player, uint8_t mini_grid_id, uint8_t
   bool allowed = false;
 
   // Check if it is player's turn
-  if (player != this->players[this->turn]) throw std::logic_error("Not player's turn!")
+  if (player != this->players[this->turn]) throw std::logic_error("Not player's turn!");
 
   // Check that the player is allowed to move in this region
   for (uint8_t i = 0; i < this.allowed_mini_grids_size; i++) {
@@ -141,6 +133,6 @@ delta_state_t DeepTacToeGame::move(uint8_t player, uint8_t mini_grid_id, uint8_t
 }
 
 uint8_t Game::addPlayer() {
-  if (this->n_players == this->max_n_players) throw std::logic_error("No more players allowed in this game!")
+  if (this->n_players == this->max_n_players) throw std::logic_error("No more players allowed in this game!");
   return this->players[this->n_players++];
 }
