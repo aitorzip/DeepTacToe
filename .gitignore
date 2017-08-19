@@ -1,5 +1,12 @@
 *.pyc
-
+*.swp
+*.autosave
 bin/
 __pycache__/
 .buildozer/
+build-*
+server/CMakeLists.txt.user
+server/cmake/inConfig/abGameServer.sh
+server/cmake/inConfig/abAppToolsBuildInfo.txt
+server/src/include/abAppTools.h
+server/src/include/abAppToolsBuildType.h

@@ -1,0 +1,4 @@
+// Auto Generated Do NOT Edit!!!
+
+PATH="@CMAKE_INSTALL_PREFIX@/bin:$PATH"
+
