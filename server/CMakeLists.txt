@@ -265,6 +265,12 @@ if(DEFINE_POPPE_PERF_CONTING OR DEFINE_POPPE_STACK_TRACE)
     include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/include )
 endif(DEFINE_POPPE_PERF_CONTING OR DEFINE_POPPE_STACK_TRACE)
 
+# if cmake -DCMAKE_INSTALL_PREFIX=path ..
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "/opt/autobon"
+        CACHE PATH "${PROJ_NAME_IMAGE} install prefix" FORCE)
+endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
 #-----------------------------------------------------------------------
 set(SVR_CONFIG_BIN_PATH    ${CMAKE_CURRENT_BINARY_DIR}/bin/${CROSS_COMPILE_ARCH})
 set(SVR_CONFIG_SRC_PATH    ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -356,12 +362,6 @@ FILE(GLOB_RECURSE includeFiles "${CMAKE_CURRENT_SOURCE_DIR}/src/include/*.h")
 add_custom_target(include SOURCES ${includeFiles})
 
 #-----------------------------------------------------------------------
-# if cmake -DCMAKE_INSTALL_PREFIX=path ..
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "/opt/autobon"
-        CACHE PATH "${PROJ_NAME_IMAGE} install prefix" FORCE)
-endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
 set(BUILD_SHARED_LIBS ON)
 
 if(NOT BUILD_SHARED_LIBS)
@@ -406,10 +406,14 @@ if(DEFINE_DOXYGEN_ENABLE AND DEFINE_DOXYGEN_INSTALL)
 endif(DEFINE_DOXYGEN_ENABLE AND DEFINE_DOXYGEN_INSTALL)
 
 #-----------------------------------------------------------------------
-#set output folder there potobuf generates *.pb.h output file
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/${SRC}/protoLib)
 
 set(SRC src)
+
+#set output folder there potobuf generates *.pb.h output file
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/${SRC}/protoLib)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${SRC}/include)
+
+message(STATUS "--------- ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}/include")
 
 # Targets to be build
 message(STATUS "=====================================================")
@@ -431,6 +435,10 @@ add_subdirectory(${SRC}/sslLib/)
 message(STATUS "=====================================================")
 
 add_subdirectory(${SRC}/protoLib/)
+
+message(STATUS "=====================================================")
+
+add_subdirectory(${SRC}/tictoeLogicLib/)
 
 message(STATUS "=====================================================")
 
