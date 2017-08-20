@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Deep Tac Toe!</title>
+        <script src="phaser.min.js"></script>
+        <script src="phaser-input.min.js"></script>
+        <script src="js/boot.js"></script>
+        <script src="js/load.js"></script>
+        <script src="js/login.js"></script>
+        <script src="js/lobby.js"></script>
+        <script src="js/play.js"></script>
+    </head>
+    <body>
+    <script type="text/javascript">
+    window.onload = function() {
+
+        var game = new Phaser.Game(860, 860, Phaser.AUTO, '');
+        game.state.add('boot', boot);
+        game.state.add('load', load);
+        game.state.add('login', login);
+        //game.state.add('lobby', lobby);
+        game.state.add('play', play);
+
+        game.state.start('boot');
+    };
+    </script>
+    </body>
+</html>
