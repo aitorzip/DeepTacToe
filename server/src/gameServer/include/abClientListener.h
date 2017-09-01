@@ -32,6 +32,9 @@ class ClientListener
 
         void onClientConnection(TCPSocket* socket);
 
+        void deserializeClientMessage(const int8_t* pBuffer,
+                                      uint32_t      msgSize);
+
     private:
         ILogMessage&    _logger;
         TCPSocket       _server;

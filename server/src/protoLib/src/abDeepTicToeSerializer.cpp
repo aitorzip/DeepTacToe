@@ -1,5 +1,5 @@
 #include "abAppToolsBuildType.h"
-#include "abSerializer.h"
+#include "abDeepTicToeSerializer.h"
 #include "abPathUtil.h"
 
 namespace DeepTacToePB
@@ -10,24 +10,24 @@ namespace DeepTacToePB
                               eGameMsgType       type,
                               const MessageLite& message)
     {
-        static thread_local TRawBuffer rawBuffer(new RawBuffer());
+        static thread_local ReadBuffer readBuffer;
 
         int32_t byteSize  = message.ByteSize();
 
-        rawBuffer->realloc( static_cast<uint32_t>(byteSize) + PROTO_HEADER_SIZE);
+        readBuffer.realloc( static_cast<uint32_t>(byteSize) + PROTO_HEADER_SIZE);
 
-        if( message.SerializePartialToArray(rawBuffer->_buffer + PROTO_HEADER_SIZE, byteSize) == false )
+        if( message.SerializePartialToArray(readBuffer.buffer() + PROTO_HEADER_SIZE, byteSize) == false )
             throw runtime_error("Serializer failed (" + std::to_string(type) +
                                 "), Reason: SerializePartialToArray returned error" +
                                 ERROR_LOCATION );
 
         // raw message is first 4 bytes
-        *reinterpret_cast<uint32_t*>(rawBuffer->_buffer) = HOST_TO_NET_L(static_cast<uint32_t>(byteSize) + sizeof(uint16_t));
+        *reinterpret_cast<uint32_t*>(readBuffer.buffer()) = HOST_TO_NET_L(static_cast<uint32_t>(byteSize) + sizeof(uint16_t));
 
         // 5th byte set to msg type
-        *reinterpret_cast<uint16_t*>(rawBuffer->_buffer + sizeof(uint32_t)) = HOST_TO_NET_S(static_cast<uint16_t>(type));
+        *reinterpret_cast<uint16_t*>(readBuffer.buffer() + sizeof(uint32_t)) = HOST_TO_NET_S(static_cast<uint16_t>(type));
 
-        return socket.send(rawBuffer->_buffer, static_cast<uint32_t>(byteSize) + PROTO_HEADER_SIZE);
+        return socket.send(readBuffer.buffer(), static_cast<uint32_t>(byteSize) + PROTO_HEADER_SIZE);
     }
 
     uint32_t Serializer::send(std::mutex& mutex, const TCPSocket&   socket,

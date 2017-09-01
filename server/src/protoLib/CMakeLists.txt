@@ -13,9 +13,14 @@ list_files( "${proto_SRC}" )
 
 include_directories(include ../include ${PROTOBUF_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-protobuf_generate_cpp(AB_PROTO_SRC PROTO_HEADER ../../../protobuf/abGameServerPB.proto)
+protobuf_generate_cpp(AB_PROTO_GAME_SVR_SRC PROTO_HEADER ../../../protobuf/abGameServerPB.proto)
+protobuf_generate_cpp(AB_PROTO_DEEP_TIC_TOE_SRC PROTO_HEADER ../../../protobuf/abDeepTacToe.proto)
 
-add_library(${AB_PROTO_LIB_NAME} ${PROTO_HEADER} ${AB_PROTO_SRC} ${proto_SRC})
+add_library(${AB_PROTO_LIB_NAME}
+            ${PROTO_HEADER}
+            ${AB_PROTO_GAME_SVR_SRC}
+            ${AB_PROTO_DEEP_TIC_TOE_SRC}
+            ${proto_SRC})
 
 target_link_libraries(${AB_PROTO_LIB_NAME} ${Protobuf_LIBRARY} abTcplib)
 

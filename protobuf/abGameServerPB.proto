@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option optimize_for = LITE_RUNTIME;
 
-package DeepTacToePB;
+package GameServerPB;
 
 enum eGameMsgType
 {
@@ -11,25 +11,6 @@ enum eGameMsgType
     eLogoff        = 2;  // Each side can send this message
     eLogin         = 3;  // Initial login request
     eLoginAck      = 4;  // Initial login acknowledge
-    eGameList      = 5;  // Game list request.
-    eGameListAck   = 6;  // Game list response. Will ge send automaticly after succesfull logon
-    eGameCreate    = 7;  // Request to start new game
-    eGameCreateAck = 8;  // New game request response. If ok then you automaticly join it. No eGameJoinAck send back to creator
-    eGameJoin      = 9;  // Request to join new game
-    eGameJoinAck   = 10; // Join request acknowledge
-    eGameJoinUpd   = 11; // Message update to all active players in game
-    eGameMessage   = 12; // Send test message to other players
-    eGameLeave     = 13; // Request to leave new game
-    eGameLeaveAck  = 14; // Leave request acknowledge. Will also we send to active players on hard connection termination
-    eGameLeaveUpd  = 15; // Message update to all active players in game
-    eGameStart     = 16; // Requested by game creator.
-    eGameStartAck  = 17; // Game start acknowledge
-    eGameStartUpd  = 18; // Game start send by system to other players followed by eGameTurn
-    eGameTurn      = 19; // Server will send next player "Your Turn"
-    eGameMove      = 20; // Request next move
-    eGameMoveAck   = 21; // Next move acknowledge.
-    eGameMoveUpd   = 22; // Move update to all active players in game
-    eGameFinished  = 23; // Game was finished
 } // When adding new enum updatge GameSerializer::msgType()
 
 enum eSucces
@@ -68,117 +49,4 @@ message login_ack
     string  message   = 2;
 }
 
-message game
-{
-    string  guid         = 1;   // unique GUID per game
-    string  description  = 2;   // user defined game text
-    bool    protected    = 3;   // true if password needed
-    bool    active       = 4;   // game is active no more players allowed
-    uint32  player_max   = 5;   // maximum players allowed
-    uint32  player_count = 6;   // number of players active
-}
 
-message game_list
-{
-    string  guid         = 1;   // request game list. Unique GUID game type. Same as used in login
-}
-
-message game_list_ack
-{
-    repeated game game_list = 1;
-}
-
-message game_create
-{
-    string  description  = 1;   // user defined game text
-    uint32  player_max   = 2;   // maximum players allowed
-    string  password     = 3;   // optional password
-    uint32  width        = 4;   //
-    uint32  height       = 5;   // optional for possible non square games. Zero for square games
-}
-
-message game_create_ack
-{
-    eSucces success   = 1;
-    string  guid      = 2;
-    string  message   = 3;
-}
-
-message game_join
-{
-    string  guid      = 1;
-    string  password  = 2;      // optional password
-}
-
-message game_join_ack
-{
-    eSucces success   = 1;
-    string  message   = 2;
-}
-
-message game_join_upd
-{
-    string  user      = 1;  // Who did joined game
-}
-
-message game_message
-{
-    string  message   = 1;  // Who send txt message
-}
-
-message game_leave
-{
-    string  guid      = 1;  // Request to leave game
-}
-
-message game_leave_ack
-{
-    eSucces success   = 1;
-    string  message   = 2;
-}
-
-message game_leave_upd
-{
-    string  user      = 1;  // Who did left the game
-}
-
-message game_start
-{
-    string  guid      = 1;  // Request to start game
-}
-
-message game_start_ack
-{
-    eSucces success   = 1;
-    string  message   = 2;
-}
-
-message game_start_upd
-{
-    string  message   = 1;  // Optional start message
-}
-
-message game_turn
-{
-    string  message   = 1;  // Optional message
-}
-
-message game_move
-{
-
-}
-
-message game_move_ack
-{
-
-}
-
-message game_move_upd
-{
-
-}
-
-message game_finished
-{
-    string  user      = 1;  // Winer
-}

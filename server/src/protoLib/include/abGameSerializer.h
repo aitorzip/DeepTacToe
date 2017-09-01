@@ -9,42 +9,16 @@
 
 #include "abTcpSocket.h"
 #include "abGameServerPB.pb.h"
+#include "abReadBuffer.h"
 #include <mutex>
 
 using namespace ::google::protobuf;
 
-namespace DeepTacToePB
+namespace GameServerPB
 {
     class Serializer
     {
-        class RawBuffer
-        {
-            friend class Serializer;
-
-            uint32_t          _size;
-            int8_t*           _buffer;
-
-            RawBuffer(void) : _size(16), _buffer(new int8_t[16]) {}
-
-            void realloc(uint32_t s)
-            {
-                if(s > _size)
-                {
-                    delete [] _buffer;
-                    _buffer = new int8_t[s+1];
-                    _size   = s;
-                }
-            }
-
-            public:
-                ~RawBuffer(void)
-                {
-                    if(_buffer)
-                        delete [] _buffer;
-                }
-        };
-
-        typedef std::unique_ptr<RawBuffer> TRawBuffer;
+        typedef std::unique_ptr<ReadBuffer> TRawBuffer;
 
         public:
             static const uint32_t PROTO_HEADER_SIZE = 6;
