@@ -1,16 +1,43 @@
 #include "abGameServer.h"
 #include "abPathUtil.h"
 #include "abStringUtil.h"
+#include "abServerConfig.h"
 #include <csignal>
 
 bool GameServer::onInitialize(void)
 {
-    string genParam;
-
-    if( findArg("-gen", genParam))
+    if( findArg("-gen"))
     {
+        std::cout << ServerConfig::genTemplate() << std::endl;
         return false;
     }
+
+    string      yamlFile;
+
+    if( findArg("-yaml", yamlFile))
+    {
+        if(yamlFile.empty())
+        {
+            onErrorMessage("Missing -yaml parameter");
+            return false;
+        }
+
+        try {
+            _serverConfig.loadFromFile(yamlFile);
+        }
+        catch(std::exception& ex)
+        {
+            onErrorMessage(ex.what());
+            return false;
+        }
+    }
+    else
+    {
+        onErrorMessage("Missing -yaml switch");
+        return false;
+    }
+
+    _clientListener.initialize(_serverConfig.iFaceAndPort());
 
     return true;
 }
@@ -22,7 +49,7 @@ void GameServer::onCreate(void)
 
 void GameServer::onStart(void)
 {
-
+    _clientListener.startAcceptingClients();
 }
 
 void GameServer::onResume(void)
@@ -32,7 +59,7 @@ void GameServer::onResume(void)
 
 void GameServer::onRunning(void)
 {
-
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
 void GameServer::onPause(void)
@@ -42,11 +69,12 @@ void GameServer::onPause(void)
 
 void GameServer::onStop(void)
 {
-
+    _clientListener.stopAcceptingClients();
 }
 
 void GameServer::onRestart(void)
 {
+
 }
 
 void GameServer::onTerminate(void)
@@ -91,11 +119,8 @@ void GameServer::onUsage(TStringList&  descList,
 {
     descList.push_back("Game Server");
 
-
-    requiredList.push_back(make_pair("-l iface:port", "Listen for incomming connections"));
-
+    requiredList.push_back(make_pair("-yaml file", "use configuration from file"));
     optionalList.push_back(make_pair("-gen",       "generate yaml template"));
-    optionalList.push_back(make_pair("-yaml file", "use configuration from file"));
 }
 
 bool GameServer::setupFromYaml(void)

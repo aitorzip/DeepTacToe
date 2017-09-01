@@ -11,13 +11,8 @@ ActiveClientMgr::~ActiveClientMgr(void)
 
 }
 
-void    ActiveClientMgr::startAcceptingClients(void)
+void    ActiveClientMgr::onNewClient(ActiveClientBase::TClientPtr& client)
 {
-    _logger.onModuleMessage(ILogMessage::eSeverity::eInfo,
-                            " ");
-}
-
-void    ActiveClientMgr::stopAcceptingClients(void)
-{
-
+    (void)client;
+    /// TODO: Finish handing new user
 }

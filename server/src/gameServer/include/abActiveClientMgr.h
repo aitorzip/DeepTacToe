@@ -7,21 +7,20 @@
 // Unauthorized copying of this file via any medium
 // is strictly prohibited without the written permission
 
-#include "abTcpSocket.h"
-#include "abILogMessage.h"
+#include "abActiveClientBase.h"
 
 class ActiveClientMgr
 {
     public:
+
                  ActiveClientMgr(ILogMessage& logger);
         virtual ~ActiveClientMgr(void);
 
-        void    startAcceptingClients(void);
-        void    stopAcceptingClients(void);
+        void    onNewClient(ActiveClientBase::TClientPtr& client);
+
 
     private:
         ILogMessage&    _logger;
-        TCPSocket       _server;
 };
 
-#endif //
+#endif // AB_ACTIVE_CLIENT_MGR_H

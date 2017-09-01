@@ -9,6 +9,9 @@
 
 #include "abIApplication.h"
 #include "abILogMessage.h"
+#include "abClientListener.h"
+#include "abActiveClientMgr.h"
+#include "abServerConfig.h"
 
 class GameServer : public IApplication, public ILogMessage
 {
@@ -43,6 +46,9 @@ class GameServer : public IApplication, public ILogMessage
 
     private:
         std::mutex          _mutex;
+        ServerConfig        _serverConfig;
+        ClientListener      _clientListener;
+        ActiveClientMgr     _activeClientMgr;
 };
 
 #endif // AB_GAME_SERVER_H

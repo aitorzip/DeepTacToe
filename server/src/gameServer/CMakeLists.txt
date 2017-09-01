@@ -16,7 +16,7 @@ include_directories(include
 # add the executable
 add_executable(${GAME_SERVER_NAME} ${game_svr_SRCS})
 
-target_link_libraries(${GAME_SERVER_NAME} abTcplib abApplib pthread )
+target_link_libraries(${GAME_SERVER_NAME} abTcplib abApplib ${YAMLCPP_LIBRARIES} pthread )
 
 set_target_properties( ${GAME_SERVER_NAME}
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${SVR_CONFIG_BIN_PATH} )

@@ -204,6 +204,27 @@ if(DEFINE_DOXYGEN_ENABLE)
     endif(NOT DOXYGEN_FOUND)
 endif(DEFINE_DOXYGEN_ENABLE)
 
+find_package(MySQL)
+
+if(MYSQL_FOUND)
+    include_directories(${MYSDQL_INCLUDE_DIR})
+else(MYSQL_FOUND)
+    message(STATUS "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    # https://downloads.mariadb.org/mariadb/repositories/#mirror=osuosl
+    #
+    if(CMAKE_CROSSCOMPILING)
+        message(FATAL_ERROR "You need to cross compile libmariadb-dev first")
+    else(CMAKE_CROSSCOMPILING)
+        if(APPLE)
+            message(STATUS "brew install libmariadb-dev (>= 10.2.8)")
+        else()
+            message(STATUS "sudo apt-get install libmariadb-dev (>= 10.2.8)")
+        endif()
+        message(STATUS "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        message(FATAL_ERROR " You need to install libmariadb-dev librarty")
+    endif(CMAKE_CROSSCOMPILING)
+endif(MYSQL_FOUND)
+
 find_package(SPDLog 0.13.0)
 
 if(SPDLOG_FOUND)
@@ -221,7 +242,7 @@ else(SPDLOG_FOUND)
             message(STATUS "sudo apt-get install libspdlog-dev (>= 0.13.0)")
         endif()
         message(STATUS "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        message(FATAL_ERROR " You need to install spdlog librarty")
+        message(FATAL_ERROR " You need to install libspdlog-dev librarty")
     endif(CMAKE_CROSSCOMPILING)
 endif(SPDLOG_FOUND)
 
@@ -413,12 +434,14 @@ set(SRC src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/${SRC}/protoLib)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${SRC}/include)
 
-message(STATUS "--------- ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}/include")
-
 # Targets to be build
 message(STATUS "=====================================================")
 
 add_subdirectory(${SRC}/appLib/)
+
+message(STATUS "=====================================================")
+
+add_subdirectory(${SRC}/dbLib/)
 
 message(STATUS "=====================================================")
 
