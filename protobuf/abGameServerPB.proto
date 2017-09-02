@@ -7,32 +7,14 @@ package GameServerPB;
 enum eGameMsgType
 {
     eUnknown       = 0;
-    eAdmin         = 1;  // System message
-    eLogoff        = 2;  // Each side can send this message
-    eLogin         = 3;  // Initial login request
-    eLoginAck      = 4;  // Initial login acknowledge
+    eLogin         = 1;  // Initial login request
+    eLoginAck      = 2;  // Initial login acknowledge
 } // When adding new enum updatge GameSerializer::msgType()
 
 enum eSucces
 {
     eNO               = 0;
     eYES              = 1;
-}
-
-message admin
-{
-    enum eType
-    {
-        eMaintenance  = 0;      // If system is in maintanance mode. User will get this message after logon request followed with login_ack
-    }
-
-    eType  type       = 1;
-    string message    = 2;
-}
-
-message logoff
-{
-    string reason     = 1;
 }
 
 message login

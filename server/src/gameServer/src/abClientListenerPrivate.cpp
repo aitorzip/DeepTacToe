@@ -1,5 +1,6 @@
 #include "abClientListener.h"
 #include "abReadBuffer.h"
+#include "abProto.h"
 
 void ClientListener::onSocketStatus(const string           msg,
                                     const ISocket::eStatus status)
@@ -45,7 +46,7 @@ void ClientListener::onClientConnection(TCPSocket* socket)
             return;
         }
 
-        deserializeClientMessage(readBuffer.buffer(), msgSize);
+        deserializeClientMessage(socket, readBuffer.buffer(), msgSize);
     }
     catch(std::exception& ex)
     {
@@ -55,15 +56,53 @@ void ClientListener::onClientConnection(TCPSocket* socket)
     }
 }
 
-void ClientListener::deserializeClientMessage(const int8_t* pBuffer,
+void ClientListener::deserializeClientMessage(TCPSocket*    socket,
+                                              const int8_t* pBuffer,
                                               uint32_t      msgSize)
 {
     // msgSize - size of protobug message
     // NOT INCLUDING first two bytes which is message type
 
-    //CamPB::eCamMsgType type = CamPB::CamSerializer::msgType(pBuffer);
+    GameServerPB::eGameMsgType type = GameServerPB::Serializer::msgType(pBuffer);
 
-    //if( type == CamPB::eUnknown)
-    //    throw std::runtime_error("invalid client msg type: " +
-    //                   std::to_string(*reinterpret_cast<const uint16_t*>(pBuffer)));
+    if( type == GameServerPB::eUnknown)
+        throw std::runtime_error("invalid client msg type: " +
+                       std::to_string(*reinterpret_cast<const uint16_t*>(pBuffer)));
+
+    const int8_t* pPBuffer = pBuffer + sizeof(uint16_t);
+
+    msgSize -= sizeof(uint16_t);
+
+    switch(type)
+    {
+        case GameServerPB::eLogin:
+        {
+            GameServerPB::login login;
+            if( login.ParseFromArray( pPBuffer, msgSize) == false )
+                throw std::runtime_error("Error Parsing Message: loginReq");
+
+            process(socket, login);
+        } break;
+
+        default:
+            throw std::runtime_error("Unknown Message");
+    }
+}
+
+void ClientListener::process(TCPSocket* socket, GameServerPB::login& login)
+{
+    GameServerPB::login_ack login_ack;
+
+    if(login.guid() == DeepTacToePB::TIC_TOE_GUID)
+    {
+        if(login.wire_ver() != DeepTacToePB::TIC_TOE_FORMAT)
+            throw std::runtime_error(string("DeepTacToePB Invalid Wire Format: ") +
+                                     std::to_string(login.wire_ver()) + " Current: " +
+                                     std::to_string(DeepTacToePB::TIC_TOE_FORMAT));
+    }
+    else
+        throw std::runtime_error(string("Unknown GUID: ") + login.guid());
+
+    /// TODO: Finish creating and handling DeepTickToe Client
+    delete socket;
 }

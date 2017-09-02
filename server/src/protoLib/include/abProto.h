@@ -8,7 +8,6 @@
 // is strictly prohibited without the written permission
 
 #include <string>
-#include "abCamConnect.pb.h"
 
 namespace DeepTacToePB
 {

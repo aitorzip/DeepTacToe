@@ -8,6 +8,7 @@
 // is strictly prohibited without the written permission
 
 #include "abActiveClientBase.h"
+#include "abGameSerializer.h"
 
 class ClientListener
 {
@@ -32,8 +33,11 @@ class ClientListener
 
         void onClientConnection(TCPSocket* socket);
 
-        void deserializeClientMessage(const int8_t* pBuffer,
+        void deserializeClientMessage(TCPSocket*    socket,
+                                      const int8_t* pBuffer,
                                       uint32_t      msgSize);
+
+        void process(TCPSocket* socket, GameServerPB::login& login);
 
     private:
         ILogMessage&    _logger;
